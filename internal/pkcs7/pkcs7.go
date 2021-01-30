@@ -9,11 +9,11 @@ import (
 // The size of the result is x times n, where x is at least 1.
 func Pad(b []byte, blockSize int) ([]byte, error) {
 	if blockSize <= 0 {
-		return nil, msg.ErrInvalidBlockSize
+		return nil, msg.ErrPkcs7InvalidBlockSize
 	}
 
 	if len(b) == 0 {
-		return nil, msg.ErrInvalidPKCS7Data
+		return nil, msg.ErrPkcs7InvalidPKCS7Data
 	}
 
 	n := blockSize - (len(b) % blockSize)
@@ -29,27 +29,27 @@ func Pad(b []byte, blockSize int) ([]byte, error) {
 // be 1 to n bytes smaller depending on the amount of padding, where n is the block size.
 func Unpad(b []byte, blockSize int) ([]byte, error) {
 	if blockSize <= 0 {
-		return nil, msg.ErrInvalidBlockSize
+		return nil, msg.ErrPkcs7InvalidBlockSize
 	}
 
 	if len(b) == 0 {
-		return nil, msg.ErrInvalidPKCS7Data
+		return nil, msg.ErrPkcs7InvalidPKCS7Data
 	}
 
 	if len(b)%blockSize != 0 {
-		return nil, msg.ErrInvalidPKCS7Padding
+		return nil, msg.ErrPkcs7InvalidPKCS7Padding
 	}
 
 	c := b[len(b)-1]
 	n := int(c)
 
 	if n == 0 || n > len(b) {
-		return nil, msg.ErrInvalidPKCS7Padding
+		return nil, msg.ErrPkcs7InvalidPKCS7Padding
 	}
 
 	for i := 0; i < n; i++ {
 		if b[len(b)-n+i] != c {
-			return nil, msg.ErrInvalidPKCS7Padding
+			return nil, msg.ErrPkcs7InvalidPKCS7Padding
 		}
 	}
 

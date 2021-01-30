@@ -31,8 +31,8 @@ func Test_CovertValidE2E(t *testing.T) {
 		decoyKeyPairs []DataKeyPair
 	}{
 		{
-			name:  "valid-5parts-1long-0decoys",
-			npart: 5,
+			name:  "valid-2parts-1long-0decoys",
+			npart: 2,
 			secretKeyPair: DataKeyPair{
 				Message:    []byte(sampleText),
 				Passphrase: "12345abcdeFGHIJ",
@@ -169,7 +169,7 @@ func TestCovert_randomizePartitionOrder(t *testing.T) {
 		c.volumes[2].Passphrase == "secret-3" &&
 		c.volumes[3].Passphrase == "secret-4" &&
 		c.volumes[4].Passphrase == "secret-5" {
-			t.Error("Partition order is the same")
+		t.Error("Partition order is the same")
 	}
 
 	c.randomizePartitionOrder()

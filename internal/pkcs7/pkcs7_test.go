@@ -44,34 +44,33 @@ func Test_Pad(t *testing.T) {
 
 func Test_Unpad(t *testing.T) {
 	tests := []struct {
-		name     string
-		byteIn   []byte
-		byteWant []byte
+		name      string
+		byteIn    []byte
+		byteWant  []byte
 		blockSize int
 	}{
 		{
-			name:     "valid-1",
-			byteIn:   []byte{45, 56, 67, 78, 57, 4, 4, 4, 4},
-			byteWant: []byte{45, 56, 67, 78, 57},
+			name:      "valid-1",
+			byteIn:    []byte{45, 56, 67, 78, 57, 4, 4, 4, 4},
+			byteWant:  []byte{45, 56, 67, 78, 57},
 			blockSize: 8,
-
 		},
 		{
-			name:     "valid-2",
-			byteIn:   []byte{76, 65, 68, 78, 43, 4, 4, 66, 4, 4, 4},
-			byteWant: []byte{76, 65, 68, 78, 43, 4, 4, 66},
+			name:      "valid-2",
+			byteIn:    []byte{76, 65, 68, 78, 43, 4, 4, 66, 4, 4, 4},
+			byteWant:  []byte{76, 65, 68, 78, 43, 4, 4, 66},
 			blockSize: 4,
 		},
 		{
-			name:     "valid-3",
-			byteIn:   []byte{86, 4},
-			byteWant: []byte{86},
+			name:      "valid-3",
+			byteIn:    []byte{86, 4},
+			byteWant:  []byte{86},
 			blockSize: 16,
 		},
 		{
-			name:     "valid-4",
-			byteIn:   []byte{4},
-			byteWant: []byte{},
+			name:      "valid-4",
+			byteIn:    []byte{4},
+			byteWant:  []byte{},
 			blockSize: 2,
 		},
 	}

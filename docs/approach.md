@@ -28,3 +28,5 @@ the other volumes, as they are garbage.
 
 When a user enters a key, Covert will iterate over all the partitions until it find one for which the key matches. If
 no matching partition are found the decryption will fail.
+
+## Choice of algorithms
