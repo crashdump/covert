@@ -1,0 +1,23 @@
+name: release
+
+# Publish new release on new tag push
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v2
+
+      - uses: actions/checkout@v2
+
+      - uses: goreleaser/goreleaser-action@v2.4.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
+        with:
+          version: latest
+          args: release --rm-dist

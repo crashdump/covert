@@ -1,0 +1,10 @@
+**/.DS_Store
+*.pid
+*.sublime*
+.idea/
+.vscode/
+coverage
+coverage.out
+lastupdate.tmp
+*.bin
+dist/*
