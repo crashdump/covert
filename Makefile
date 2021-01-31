@@ -7,3 +7,6 @@ test:
 
 coverage:
 	go tool cover -html=coverage.out
+
+release-test:
+	goreleaser --snapshot --skip-publish --rm-dist

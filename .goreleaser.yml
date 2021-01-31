@@ -1,7 +1,7 @@
 project_name: covert
 release:
   github:
-    owner: covert
+    owner: crashdump
     name: covert
   name_template: 'Release {{.Tag}}'
 before:
@@ -9,6 +9,7 @@ before:
     - go mod download
 builds:
   - binary: covert
+    main: ./cmd/
     env:
       - CGO_ENABLED=0
       - GO111MODULE=on
@@ -38,7 +39,8 @@ archives:
       - goos: windows
         format: zip
     files:
-      - LICENSE
+      - docs/*
+      - LICENSE.md
       - README.md
 checksum:
   name_template: 'checksums.txt'
