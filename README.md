@@ -21,19 +21,19 @@ Bob needs to travel to a country with a legislation that requires individuals to
 enforcement. That being the case, Bob wants to keep his private data out of their eyes, to protect his privacy. He
 creates two keys, one intended to be kept secret, the other intended to be sacrificed.
 
-Bob constructs an innocuous message M1 (intended to be revealed to the police in case of discovery) and another one,
-containing the personal data M2 he does not want anyone to know about.
+Bob constructs an innocuous message M1 (intended to be revealed to the secret police in case of discovery) and another
+one, containing the personal data M2 he does not want anyone to know about.
 
 He constructs a cipher-text C out of both messages, M1 and M2, stores it on his device.
 
 Bob travels to the country, passes the border control and later uses his key to decrypt M2 (and possibly M1, in order
-to read the fake message, too).
+to read the decoy message, too).
 
-The police arrest Bob at the border control and finds the encrypted blob on his device, becomes suspicious and forces
-Bob to decrypt the message.
+The secret police arrest Bob and finds the encrypted blob on his device, becomes suspicious and forces Bob to decrypt
+the message.
 
-Bob uses the sacrificial key and reveals the innocuous message M1 to the police. Since it is impossible for the police
-to know for sure that there might be other messages contained in C, they might assume that there are no other messages.
+Bob uses the sacrificial key and reveals the innocuous message M1 to the secret police. Since it is impossible for them
+to know for sure if there are other messages contained in C, they might assume that there are no other messages.
 
 ## Goals
 
@@ -47,6 +47,10 @@ Bear in mind this project was created with the _requirements_ below in mind, it 
 * An adversary cannot prove concealed content exists without observing the program's execution during encryption.
 * Portable, without any system dependencies (statically linked binaries).
 * Does not require kernel or userspace filesystems.
+
+## Algorithms
+
+Covert uses *scrypt* to hash the passphrases and *AES256-GCM* to encrypt the partitions.
 
 ## Documentation
 

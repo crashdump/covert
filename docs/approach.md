@@ -6,27 +6,29 @@ Coverts encrypted volumes are composed of one or more of the following parts con
 - Decoy partition (DP): Innocuous file(s), as decoys.
 - Garbage Partition (RP): Key is thrown away during volume creation.
 
-Decoy and secret partitions are optional, you can use this tool to create a single AES-256 partition.
+Note: Decoy and secret partitions are optional, but you should probably specify them. 
+Note: A volume is composed of at least 3 partitions.
 
-You could, for example, create a new volume composed of 5 parts:
+You could, for example, create a new volume composed of 3 partitions:
 
-| _DP_ | *SP* | GP | _DP_ | GP |
+| _Decoy_ | *Secret* | Garbage |
 
-If you were put in a position where you were forced to give away the keys, you could provide one, or two, of the
-insignificant partitions. Keeping to Secret partition's key to yourself and pretending you do not have the key to
-the other volumes, as they are garbage.
+If you were put in a position where you were forced to give away the keys, you could provide the key to the 
+insignificant partition. Keeping the Secret partition's key to yourself and pretending you do not have the
+key to the other volumes, and that they are all garbage.
+
+You could go further by adding, for example, two or more decoy partitions.
+
+| _Decoy_ | *Secret* | _Decoy_ | Garbage |
 
 ## Considerations
 
-- The minimum number of partitions is 3: 1 SP, 1 IP and 1 RP, there are no maximums.
-- All the partitions are always of the same size, and a total volume size is always `vsize = biggest_file * number_partition`.
-- Partition location are random.
-- Covert only supports 1 file per partition currently.
-- The performance of the implementation could be optimised in a few areas.
+- All the partitions are always of the same size, and the volume size is `vsize = number_partition * (biggest_file + AES overhead)`.
+- Partition location are randomised during the creation of the volume.
+- Covert currently only supports 1 file per partition (you could provide an ISO-9660 or a DMG to work around this, though).
+- The current implementation can be slow with large amounts of data
 
 ## Flows
 
 When a user enters a key, Covert will iterate over all the partitions until it find one for which the key matches. If
 no matching partition are found the decryption will fail.
-
-## Choice of algorithms
