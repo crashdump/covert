@@ -11,6 +11,10 @@ import (
 )
 
 func Encrypt(plaintext []byte, passphrase string) ([]byte, error) {
+	if passphrase == "" {
+		return nil, errors.New("you must provide a passphrase")
+	}
+
 	key, err := scrypt.Hash(passphrase)
 	if err != nil {
 		return nil, err

@@ -1,12 +1,14 @@
 package covert
 
 import (
+	"crypto/aes"
 	"crypto/rand"
 	"errors"
 	"fmt"
 	aesgcm "github.com/crashdump/covert/internal/aes/gcm"
 	mrand "math/rand"
 
+	"github.com/crashdump/covert/internal/msg"
 	"github.com/crashdump/covert/internal/pkcs7"
 	"github.com/crashdump/covert/internal/srand"
 )
@@ -24,31 +26,35 @@ type DataKeyPair struct {
 }
 
 func New(npart int) *Covert {
-	if npart != 0 {
-		return &Covert{numPart: npart}
-	}
-	return &Covert{numPart: 3}
+	return &Covert{numPart: npart}
 }
 
-const BLOCKSIZE = 64
-
-func (c *Covert) Encrypt(secrets DataKeyPair, decoys []DataKeyPair) ([]byte, error) {
-	c.volumes = append(c.volumes, secrets)
-	c.volumes = append(c.volumes, decoys...)
-	var err error
-
-	// Validate input parameters are acceptable and find the size of the largest partition.
-	for _, dkp := range c.volumes {
-		messageLength := len(dkp.Message)
-		if messageLength == 0 || len(dkp.Passphrase) == 0 {
-			return nil, errors.New("'cleartext' and 'Passphrase' length must be > 0")
-		}
-		if messageLength > c.partSize {
-			c.partSize = messageLength
-		}
+func (c *Covert) Encrypt(partitions []DataKeyPair) ([]byte, error) {
+	if c.numPart < 3 {
+		return nil, msg.ErrCovertInvalidAmountPartition
 	}
 
-	fmt.Printf("partition size will be at least %d\n", c.partSize)
+	c.volumes = partitions
+	var err error
+
+	// Validate input parameters are acceptable and find the size of the largest partitions.
+	for _, dkp := range c.volumes {
+		messageLength := len(dkp.Message)
+		if len(dkp.Passphrase) == 0 {
+			return nil, msg.ErrCovertInvalidLengthPassphrase
+		}
+		if messageLength == 0 {
+			return nil, msg.ErrCovertInvalidLengthCleartext
+		}
+
+		if messageLength > c.partSize {
+			// Looking for the next highest number divisible by 16 (block size)
+			for i := messageLength; i%16 != 0; i++ {
+				c.partSize = i + 1
+			}
+		}
+	}
+	fmt.Printf("partitions size is %d\n", c.partSize)
 
 	// Calculate how many garbage partitions we need to create and create them
 	c.numGP = c.numPart - len(c.volumes)
@@ -71,20 +77,20 @@ func (c *Covert) Encrypt(secrets DataKeyPair, decoys []DataKeyPair) ([]byte, err
 
 	// Pad the data
 	for i, dkp := range c.volumes {
-		c.volumes[i].Message, err = pkcs7.Pad(dkp.Message, BLOCKSIZE) //c.partSize)
+		c.volumes[i].Message, err = pkcs7.Pad(dkp.Message, c.partSize)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	// Randomise partition order
+	// Randomise partitions order
 	c.randomizePartitionOrder()
-	fmt.Printf("randomizing partition order\n")
+	fmt.Printf(msg.InfoCovertPartitionRandomOrder)
 
-	// And finally, encryptAES256CBC and concatenate them
-	var cipheredVolume []byte
+	// And finally, encrypt each partitions with AES256-GCM and concatenate them into a volume
+	var cipheredVolume []byte //nolint:prealloc
 	for i, dkp := range c.volumes {
-		fmt.Printf("encrypting partition %d/%d\n", i+1, c.numPart)
+		fmt.Printf(msg.InfoCovertPartitionEncryption, i+1, c.numPart)
 
 		ciphertext, err := aesgcm.Encrypt(dkp.Message, dkp.Passphrase)
 		if err != nil {
@@ -98,14 +104,17 @@ func (c *Covert) Encrypt(secrets DataKeyPair, decoys []DataKeyPair) ([]byte, err
 }
 
 func (c *Covert) Decrypt(ciphertext []byte, passphrase string) ([]byte, error) {
-	if len(ciphertext) == 0 || len(passphrase) == 0 {
-		return nil, errors.New("ciphertext and Passphrase must be != 0")
+	if len(ciphertext) == 0 {
+		return nil, msg.ErrCovertInvalidLengthPassphrase
+	}
+	if len(passphrase) == 0 {
+		return nil, msg.ErrCovertInvalidLengthCleartext
 	}
 
 	vsize := len(ciphertext)
 	psize := vsize / c.numPart
 	if r := vsize % c.numPart; r != 0 {
-		err := fmt.Sprintf("incorrect volume size/partition ratio (%d bytes / %d partitions = %d bytes !)", vsize, c.numPart, r)
+		err := fmt.Sprintf("incorrect volume size/partitions ratio (%d bytes / %d partitions = %d bytes !)", vsize, c.numPart, r)
 		return nil, errors.New(err)
 	}
 
@@ -115,7 +124,7 @@ func (c *Covert) Decrypt(ciphertext []byte, passphrase string) ([]byte, error) {
 			continue
 		}
 
-		cleartext, err = pkcs7.Unpad(cleartext, BLOCKSIZE)
+		cleartext, err = pkcs7.Unpad(cleartext, aes.BlockSize)
 		if err != nil {
 			return nil, err
 		}
@@ -123,7 +132,7 @@ func (c *Covert) Decrypt(ciphertext []byte, passphrase string) ([]byte, error) {
 		return cleartext, nil
 	}
 
-	return nil, errors.New("no partitions matching this key were found")
+	return nil, msg.ErrCovertNoPartitionMacthKey
 }
 
 func (c *Covert) randomizePartitionOrder() {

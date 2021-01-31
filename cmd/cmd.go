@@ -9,16 +9,17 @@ import (
 
 var usage = `usage: covert [--version] [--help]
 
-encrypt - encrypt the given file(s) into a series volume, you can specifie as many -in/-key pair as you need.
-    
-    -in 	name of the file to be encrypted
-    -key	secret key to use to encrypt the data
+encrypt - encrypt the given file(s) into a series volume, you can specify as many input file(s) as
+you need. Covert recommend at least one decoy, but it's not mandatory.
 
-	example: encrypt -in example.txt -key my-secret-key
+    -input 	              name of the file(s) to be encrypted
+    -garbage-partitions   number of garbage partitions you would like (defaults to 1)
+
+	example: encrypt -input secret.txt -input decoy.txt
 
 decrypt - search for a volume matching the given key and output the data to a file if found.
 
-	example: decrypt -out example.txt -key my-secret-key
+	example: decrypt -out example.txt
 `
 
 func main() {

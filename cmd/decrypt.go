@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"errors"
 	"flag"
 	"fmt"
@@ -11,11 +10,10 @@ import (
 )
 
 type cmdDecrypt struct {
-	fs *flag.FlagSet
-	//name    string
-	fileIn  string
-	fileOut string
-	key     string
+	fs         *flag.FlagSet
+	fileIn     string
+	fileOut    string
+	passphrase string
 }
 
 func NewDecryptCmd() *cmdDecrypt {
@@ -24,9 +22,6 @@ func NewDecryptCmd() *cmdDecrypt {
 	}
 	cd.fs.StringVar(&cd.fileIn, "input", "", "file to encrypt (cleartext)")
 	cd.fs.StringVar(&cd.fileOut, "output", "", "file output (encrypted)")
-
-	// TODO: Use stdin to ask for the key instead of the command line (insecure / shell history)
-	cd.fs.StringVar(&cd.key, "key", "", "secret key to decrypt the data")
 
 	return cd
 }
@@ -40,13 +35,13 @@ func (g *cmdDecrypt) Init(args []string) error {
 }
 
 func (g *cmdDecrypt) Validate() error {
-	if g.fileIn == "" || g.key == "" {
+	if g.fileIn == "" {
 		g.fs.PrintDefaults()
-		return errors.New("you must specify the input file and a key")
+		return errors.New("you must specify the ciphered input file")
 	}
 	if g.fileOut == "" {
 		g.fs.PrintDefaults()
-		return errors.New("you must specify the cleartext output file")
+		return errors.New("you must specify the cleartext file destination")
 	}
 	return nil
 }
@@ -57,22 +52,29 @@ func (g *cmdDecrypt) Run() error {
 		panic(err.Error())
 	}
 
+	// Required for UT
+	if g.passphrase == "" {
+		g.passphrase, err = readPassword(g.fileIn)
+		if err != nil {
+			return err
+		}
+	}
+
 	f, err := os.Create(g.fileOut)
 	if err != nil {
 		panic(err.Error())
 	}
 	defer f.Close()
 
-	e := covert.New(5)
-	cleartext, err := e.Decrypt(ciphertext, g.key)
+	d := covert.New(3)
+	cleartext, err := d.Decrypt(ciphertext, g.passphrase)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	f.Write(cleartext)
 
-	// TODO: Delete this debugging output
-	fmt.Printf("--- DECRYPTION ---\n ciphertext: %s\n  cleartext: %s\n", base64.StdEncoding.EncodeToString(ciphertext), cleartext)
+	fmt.Println("success.")
 
 	return nil
 }

@@ -20,7 +20,7 @@ func Test_Pad(t *testing.T) {
 		},
 		{
 			name:      "valid-short",
-			byteIn:    []byte{1},
+			byteIn:    []byte{0x1},
 			byteWant:  []byte{0x1, 0x7, 0x7, 0x7, 0x7, 0x7, 0x7, 0x7},
 			blockSize: 8,
 		},
@@ -50,27 +50,21 @@ func Test_Unpad(t *testing.T) {
 		blockSize int
 	}{
 		{
-			name:      "valid-1",
-			byteIn:    []byte{45, 56, 67, 78, 57, 4, 4, 4, 4},
-			byteWant:  []byte{45, 56, 67, 78, 57},
-			blockSize: 8,
-		},
-		{
-			name:      "valid-2",
-			byteIn:    []byte{76, 65, 68, 78, 43, 4, 4, 66, 4, 4, 4},
-			byteWant:  []byte{76, 65, 68, 78, 43, 4, 4, 66},
-			blockSize: 4,
-		},
-		{
-			name:      "valid-3",
-			byteIn:    []byte{86, 4},
-			byteWant:  []byte{86},
+			name:      "valid-long",
+			byteIn:    []byte{0x1, 0x2, 0x3, 0x4, 0x5, 0xb, 0xb, 0xb, 0xb, 0xb, 0xb, 0xb, 0xb, 0xb, 0xb, 0xb},
+			byteWant:  []byte{0x1, 0x2, 0x3, 0x4, 0x5},
 			blockSize: 16,
 		},
 		{
-			name:      "valid-4",
-			byteIn:    []byte{4},
-			byteWant:  []byte{},
+			name:      "valid-short",
+			byteIn:    []byte{0x1, 0x7, 0x7, 0x7, 0x7, 0x7, 0x7, 0x7},
+			byteWant:  []byte{0x1},
+			blockSize: 8,
+		},
+		{
+			name:      "valid-short-block",
+			byteIn:    []byte{0x1, 0x1},
+			byteWant:  []byte{0x1},
 			blockSize: 2,
 		},
 	}
@@ -92,12 +86,12 @@ func Test_PadE2E(t *testing.T) {
 		{
 			name:      "valid-string",
 			byteIn:    []byte("Test data which has absolutely no sense."),
-			blockSize: 90,
+			blockSize: 128,
 		},
 		{
 			name:      "valid-int",
 			byteIn:    []byte{76, 65, 68, 78, 43, 4, 4, 66},
-			blockSize: 20,
+			blockSize: 16,
 		},
 		{
 			name:      "valid-1-byte",

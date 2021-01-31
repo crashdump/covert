@@ -25,92 +25,112 @@ BIG BROTHER IS WATCHING YOU, the caption beneath it ran.
 
 func Test_CovertValidE2E(t *testing.T) {
 	tests := []struct {
-		name          string
-		npart         int
-		secretKeyPair DataKeyPair
-		decoyKeyPairs []DataKeyPair
+		name       string
+		npart      int
+		partitions []DataKeyPair
+		wantErr    bool
 	}{
 		{
-			name:  "valid-2parts-1long-0decoys",
+			name:  "invalid-2partitions-1long",
 			npart: 2,
-			secretKeyPair: DataKeyPair{
-				Message:    []byte(sampleText),
-				Passphrase: "12345abcdeFGHIJ",
+			partitions: []DataKeyPair{
+				{
+					Message:    []byte(sampleText),
+					Passphrase: "!@WtpJeo95uIHwKfyU(8fdOIe",
+				},
 			},
+			wantErr: true,
 		},
 		{
-			name:  "valid-2parts-1short-0decoys",
-			npart: 2,
-			secretKeyPair: DataKeyPair{
-				Message:    []byte("a short test sentence."),
-				Passphrase: "12345abcdeFGHIJ",
+			name:  "valid-3partitions-1long",
+			npart: 3,
+			partitions: []DataKeyPair{
+				{
+					Message:    []byte(sampleText),
+					Passphrase: "qKO329wt|i5w8p3PywtIO7iq",
+				},
 			},
+			wantErr: false,
 		},
 		{
-			name:  "valid-5parts-1short-1decoys",
+			name:  "valid-3partitions-1short",
+			npart: 3,
+			partitions: []DataKeyPair{
+				{
+					Message:    []byte("a short test sentence."),
+					Passphrase: "12345aJOI45e)p0i'GHIJ",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:  "valid-5partitions-1short-1decoys",
 			npart: 5,
-			secretKeyPair: DataKeyPair{
-				Message:    []byte("a short test sentence."),
-				Passphrase: "12345abcdeFGHIJ",
-			},
-			decoyKeyPairs: []DataKeyPair{
+			partitions: []DataKeyPair{
+				{
+					Message:    []byte("a short test sentence."),
+					Passphrase: "12345abcdeFGHIJ",
+				},
 				{
 					Message:    []byte("a decoy."),
 					Passphrase: "uhFheuKLfdi32d89t4.y",
 				},
 			},
+			wantErr: false,
 		},
 		{
-			name:  "valid-5parts-1short-2decoys",
-			npart: 5,
-			secretKeyPair: DataKeyPair{
-				Message:    []byte("a short test sentence."),
-				Passphrase: "12345abcdeFGHIJ",
-			},
-			decoyKeyPairs: []DataKeyPair{
+			name:  "valid-10partitions",
+			npart: 10,
+			partitions: []DataKeyPair{
 				{
-					Message:    []byte("a decoy."),
-					Passphrase: "uhFheuKLfdi32d89t4.y",
+					Message:    []byte("a short test sentence."),
+					Passphrase: "12345abcdeFGHIJ",
 				},
 				{
-					Message:    []byte("a decoy."),
+					Message:    []byte("a number."),
+					Passphrase: "uhFh;oj(*U0iL0pig",
+				},
+				{
+					Message:    []byte("another decoy."),
 					Passphrase: "uhFheuKLfdi32d89t4.y",
 				},
 			},
+			wantErr: false,
 		},
 		{
-			name:  "invalid-1-short-6-decoys",
+			name:  "invalid-5partitions-6decoys",
 			npart: 5,
-			secretKeyPair: DataKeyPair{
-				Message:    []byte("a short test sentence."),
-				Passphrase: "12345abcdeFGHIJ",
+			partitions: []DataKeyPair{
+				{
+					Message:    []byte("a short test sentence."),
+					Passphrase: "aD;opw7643FWEw3-pq3oi",
+				},
+				{
+					Message:    []byte("the first decoy."),
+					Passphrase: "8u9fdio8u89d8o0uoiu",
+				},
+				{
+					Message:    []byte("the second decoy."),
+					Passphrase: "09ifdi32dp;lokh80",
+				},
+				{
+					Message:    []byte("the third decoy."),
+					Passphrase: "435ertyLfdi32d7r65er",
+				},
+				{
+					Message:    []byte("the fourth decoy."),
+					Passphrase: "jmhnbfdi32d809o8iu",
+				},
+				{
+					Message:    []byte("the fifth decoy."),
+					Passphrase: "09o8iud89lk,jmnb",
+				},
+				{
+					Message:    []byte("the seventh decoy."),
+					Passphrase: "09=i8uyNdi32d89tuOWwKlKop",
+				},
 			},
-			decoyKeyPairs: []DataKeyPair{
-				{
-					Message:    []byte("a decoy."),
-					Passphrase: "uhFheuKLfdi32d89t4.y",
-				},
-				{
-					Message:    []byte("a decoy."),
-					Passphrase: "uhFheuKLfdi32d89t4.y",
-				},
-				{
-					Message:    []byte("a decoy."),
-					Passphrase: "uhFheuKLfdi32d89t4.y",
-				},
-				{
-					Message:    []byte("a decoy."),
-					Passphrase: "uhFheuKLfdi32d89t4.y",
-				},
-				{
-					Message:    []byte("a decoy."),
-					Passphrase: "uhFheuKLfdi32d89t4.y",
-				},
-				{
-					Message:    []byte("a decoy."),
-					Passphrase: "uhFheuKLfdi32d89t4.y",
-				},
-			},
+			wantErr: true,
 		},
 	}
 
@@ -119,20 +139,23 @@ func Test_CovertValidE2E(t *testing.T) {
 			e := New(tt.npart)
 
 			fmt.Println("Testing encryption...")
-			ciphertext, err := e.Encrypt(tt.secretKeyPair, tt.decoyKeyPairs)
+			ciphertext, err := e.Encrypt(tt.partitions)
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Empty(t, ciphertext)
+				return
+			}
 			assert.NoError(t, err)
 			assert.NotEmpty(t, ciphertext, "Empty ciphertext")
 
-			// Check length of ciphertext equals at least = n * (biggest secret + nonce)
-			//allParts := append(tt.decoyKeyPairs, tt.secretKeyPair)
-			//totalSize := tt.numPart * (setPartitionSize(allParts) + 12)
-			//assert.Len(t, ciphertext, totalSize) // Overhead of AES-GCM + Nonce (12bit)
-
 			fmt.Println("Testing decryption...")
 			d := New(tt.npart)
-			cleartext, err := d.Decrypt(ciphertext, tt.secretKeyPair.Passphrase)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.secretKeyPair.Message, cleartext, "Input Message and output Message are different")
+
+			for _, partition := range tt.partitions {
+				cleartext, err := d.Decrypt(ciphertext, partition.Passphrase)
+				assert.NoError(t, err)
+				assert.Equal(t, partition.Message, cleartext, "Input Message and output Message are different")
+			}
 		})
 	}
 }
@@ -141,23 +164,23 @@ func TestCovert_randomizePartitionOrder(t *testing.T) {
 	c := &Covert{
 		volumes: []DataKeyPair{
 			{
-				Message:    []byte("partition-1"),
+				Message:    []byte("partitions-1"),
 				Passphrase: "secret-1",
 			},
 			{
-				Message:    []byte("partition-2"),
+				Message:    []byte("partitions-2"),
 				Passphrase: "secret-2",
 			},
 			{
-				Message:    []byte("partition-3"),
+				Message:    []byte("partitions-3"),
 				Passphrase: "secret-3",
 			},
 			{
-				Message:    []byte("partition-4"),
+				Message:    []byte("partitions-4"),
 				Passphrase: "secret-4",
 			},
 			{
-				Message:    []byte("partition-5"),
+				Message:    []byte("partitions-5"),
 				Passphrase: "secret-5",
 			},
 		},
