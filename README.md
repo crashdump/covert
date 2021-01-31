@@ -2,6 +2,11 @@
 
 Covert is a deniable encryption software.
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=crashdump_covert&metric=alert_status)](https://sonarcloud.io/dashboard?id=crashdump_covert)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=crashdump_covert&metric=bugs)](https://sonarcloud.io/dashboard?id=crashdump_covert)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=crashdump_covert&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=crashdump_covert)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=crashdump_covert&metric=code_smells)](https://sonarcloud.io/dashboard?id=crashdump_covert)
+
 ## Disclaimer
 
 Covert is an early stage **research prototype** and comes with absolutely **no warranty**.
@@ -56,9 +61,13 @@ Covert uses *scrypt* to hash the passphrases and *AES256-GCM* to encrypt the par
 
 All the documentation lives in the `docs` folder.
 
-- [usage](docs/usage.md)
-- [approach](docs/approach.md)
+### How to
+- [Cli usage](docs/usage.md)
+- [Library](docs/library.md)
+
+### Technical details
+- [Approach](docs/approach.md)
 
 ## License
 
-GNU General Public License version 3.
+GNU Lesser General Public version 3. See [LICENSE.md](LICENSE.md)
