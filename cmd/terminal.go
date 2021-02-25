@@ -3,15 +3,16 @@ package main
 import (
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/ssh/terminal"
 	"syscall"
+
+	"golang.org/x/term"
 )
 
 func readPassword(filename string) (string, error) {
 	var passphrase string
 	fmt.Printf("passphrase for %s: ", filename)
 
-	bpassphrase, err := terminal.ReadPassword(int(syscall.Stdin))
+	bpassphrase, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
 		return "", err
 	}

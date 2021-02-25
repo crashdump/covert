@@ -87,7 +87,10 @@ func (g *cmdEncrypt) Run() error {
 
 	fmt.Printf("writing to %s\n", g.fileOut)
 
-	f.Write(ciphertext)
+	_, err = f.Write(ciphertext)
+	if err != nil {
+		panic(err.Error())
+	}
 
 	fmt.Println("success.")
 

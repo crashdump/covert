@@ -72,7 +72,10 @@ func (g *cmdDecrypt) Run() error {
 		panic(err.Error())
 	}
 
-	f.Write(cleartext)
+	_, err = f.Write(cleartext)
+	if err != nil {
+		panic(err.Error())
+	}
 
 	fmt.Println("success.")
 
