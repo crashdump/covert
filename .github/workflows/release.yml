@@ -17,7 +17,7 @@ jobs:
 
       - uses: actions/setup-go@v3
 
-      - uses: goreleaser/goreleaser-action@v2.9.1
+      - uses: goreleaser/goreleaser-action@v4.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
